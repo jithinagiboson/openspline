@@ -26,7 +26,7 @@ test('client config overrides environment and is immutable',()=>{
  }finally{if(oldUrl===undefined)delete process.env.OPENSPLINE_URL;else process.env.OPENSPLINE_URL=oldUrl;}
 });
 test('invalid configuration fails before network requests',()=>{
- for(const config of [{quality:'pro'},{timeout:0},{timeout:Infinity},{viewerTimeout:NaN},{viewerTimeout:.5},{url:'ftp://example.com'},{url:'https://user:secret@example.com'},{url:''},{apiKey:'removed'},{quailty:'high'}])assert.throws(()=>new Openspline(config),TypeError);
+ for(const config of [{quality:'pro'},{timeout:0},{timeout:Infinity},{viewerTimeout:NaN},{viewerTimeout:.5},{url:'ftp://example.com'},{url:'https://user:secret@example.com'},{url:''},{apiKey:''},{apiKey:'contains space'},{quailty:'high'}])assert.throws(()=>new Openspline(config),TypeError);
 });
 test('configured quality reaches the session request and can be overridden',async()=>{
  const client=new Openspline({quality:'high'});const seen=[];

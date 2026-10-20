@@ -13,7 +13,7 @@
 
 
 
-**Add a live face to any voice AI agent in five lines.** Turn a portrait and generated audio into synchronized video and speech on your own GPU.
+**Add a live face to any voice AI agent in five lines.** Turn a portrait and generated audio into synchronized video and speech on OpenSpline Cloud or your own GPU.
 
 [Try Online (no GPU or installation needed)](https://dashboard.openspline.dev/explore)
 
@@ -21,16 +21,15 @@
 - **Bring your agent.** Keep your prompts, tools, microphone, and voice provider.
 - **Python first, Node supported.** Stream audio or use a ready-made connector.
 - **Ready to display.** Built-in viewer, React component, and web component.
-- **Self-hosted.** One active session per GPU worker; add GPUs for concurrency.
+- **Cloud or self-hosted.** Start with an openspline cloud, or run the models on your GPUs.
 
-[Quick start](#quick-start) · [Connectors](#connectors) · [Configuration](#configuration) · [Node SDK](#node-sdk) · [Frontend](#frontend) · [GPU workers](#gpu-workers)
-
+[Quickstart](#quickstart) · [Openspline Cloud](#openspline-cloud) · [Self Host](#self-host) · [Connectors](#connectors) · [Configuration](#configuration) · [Node SDK](#node-sdk) · [Frontend](#frontend) · [GPU workers](#gpu-workers)
 
 ## Examples
 
-Avatars created with [OpenSpline Cloud](experiments/openspline_cloud). Click a preview or **Try online** to open the live avatar.
 
-<!-- GitHub strips iframe/script embeds. These looping GIFs come from the public Explore preview videos. -->
+
+<!-- GitHub strips iframe/script embeds. These looping GIFs show published avatars. -->
 <table>
   <tr>
     <th>Nikola Tesla</th>
@@ -54,11 +53,22 @@ Avatars created with [OpenSpline Cloud](experiments/openspline_cloud). Click a p
   </tr>
 </table>
 
+# Quickstart
+
+There are two ways to run avatar generation:
+
+- [Fully Hosted Cloud](#openspline-cloud): If you don't have a GPU or want to scale.
+- [Self Host](#self-host): Run on your own GPU locally.
+
+**GPU compatibility:** PyTorch uses CUDA 12.8 for Blackwell (including RTX 50-series) and CUDA 12.6 for older NVIDIA GPUs. Pre-Ampere cards use FP32, which needs more VRAM and may be slower. AMD and Apple GPUs are not supported yet. Blackwell and pre-Ampere inference still need hardware validation.
+
 ## Openspline Cloud
 
-Create, share, and embed your own avatar at [openspline.dev](https://openspline.dev), or explore the [Cloud app source and embed examples](experiments/openspline_cloud/README.md#use-in-code).
+Create and embed an avatar in the Cloud dashboard, or use the API to generate avatars on Openspline GPUs.
 
-## Quick start
+[Cloud Components & API Docs ↗](docs/cloud_quickstart.md)
+
+## Self Host
 
 ### Install the GPU service
 
@@ -96,17 +106,18 @@ async with client.avatar("portrait.jpg", quality="low") as avatar:
     await avatar.stream(agent.audio_stream(), sample_rate=24000)
 ```
 
+[Add a custom photo or video background](docs/custom_background.md).
+
 `stream()` accepts generated PCM audio and returns after playback finishes. WAV and MP3 files are also supported.
 
-Avatars keep generating fresh idle video while listening and after interruptions, using near-silent audio with very low-level noise for model conditioning. Speech and idle video share the same motion state; idle clips are never looped or replaced with an animated portrait. The noise is not sent to speakers. Generation keeps at most one idle batch ahead of playback, and speech takes priority. The GPU stays active throughout a connected session; smooth continuous motion requires inference to keep up with playback.
-
-**GPU compatibility:** PyTorch uses CUDA 12.8 for Blackwell (including RTX 50-series) and CUDA 12.6 for older NVIDIA GPUs. Pre-Ampere cards use FP32, which needs more VRAM and may be slower. AMD and Apple GPUs are not supported by this backend. Blackwell and pre-Ampere inference still need hardware validation.
+The GPU stays active throughout a connected session; smooth continuous motion requires inference to keep up with playback.
 
 ## Connectors
 
-These snippets plug into an existing async agent. Openspline owns output playback; disable your previous speaker output to avoid playing audio twice. Provider credentials stay on your backend. Each connector links to a complete runnable example.
+These snippets plug into an existing async agent. Openspline owns output playback; disable your previous speaker output to avoid playing audio twice. Provider credentials stay on your backend.
 
-### OpenAI Realtime
+<details>
+<summary>OpenAI Realtime</summary>
 
 Install `pip install openai==2.54.0`. Wrap your existing OpenAI Realtime connection; tools and transcripts still reach your event handler.
 
@@ -127,7 +138,10 @@ async with Openspline().avatar("portrait.jpg") as avatar:
 
 [Run the example](examples/python/openai_realtime.py): `OPENAI_API_KEY=... python examples/python/openai_realtime.py portrait.jpg`.
 
-### LiveKit
+</details>
+
+<details>
+<summary>LiveKit</summary>
 
 Install `pip install 'livekit-agents[openai]==1.8.3'`. Add the avatar before starting your existing `AgentSession`; playback uses your normal LiveKit frontend.
 
@@ -142,7 +156,10 @@ await agent_session.start(room=ctx.room, agent=agent)
 
 [Run the example](examples/python/livekit_agent.py): `PORTRAIT=portrait.jpg python examples/python/livekit_agent.py dev`. Set `OPENAI_API_KEY`, `LIVEKIT_URL`, `LIVEKIT_API_KEY`, and `LIVEKIT_API_SECRET`. The native service includes LiveKit support.
 
-### Gemini Realtime
+</details>
+
+<details>
+<summary>Gemini Realtime</summary>
 
 Install `pip install google-genai==1.75.0`. Forward every audio part from your existing Gemini Live session, including interruption and turn-end events.
 
@@ -160,7 +177,10 @@ async with Openspline().avatar("portrait.jpg") as avatar:
 
 [Run the example](examples/python/gemini.py): `GEMINI_API_KEY=... python examples/python/gemini.py portrait.jpg`. Repeat the receive loop for subsequent turns; set `GEMINI_LIVE_MODEL` to override the model.
 
-### ElevenLabs Agents
+</details>
+
+<details>
+<summary>ElevenLabs Agents</summary>
 
 Connect an existing [ElevenLabs agent WebSocket](https://elevenlabs.io/docs/eleven-agents/api-reference/eleven-agents/websocket). No additional provider SDK is needed. Pass decoded events, including the initial metadata, so the adapter uses the agent's negotiated audio format.
 
@@ -183,7 +203,10 @@ The adapter supports PCM and μ-law audio, flushes final audio, and handles inte
 
 [Python example](examples/python/elevenlabs_agents.py): `ELEVENLABS_AGENT_ID=... python examples/python/elevenlabs_agents.py portrait.jpg`. [Node example](examples/node/elevenlabs_agents.mjs): `ELEVENLABS_AGENT_ID=... node examples/node/elevenlabs_agents.mjs portrait.jpg`. Set `ELEVENLABS_API_KEY` for private agents; the examples request a signed URL on the backend. Each plays one response; the demo supports microphone conversations. Configure the agent's client events to include `audio`, `interruption`, and `agent_response_complete`. Custom client tools and required dynamic variables need your application's handlers and initiation data; the demo uses the agent's saved configuration.
 
-### Custom connector
+</details>
+
+<details>
+<summary>Custom connector</summary>
 
 Use any TTS provider or agent with an async PCM16 audio iterator. `stream()` buffers audio, flushes the final block, and waits for playback to finish.
 
@@ -196,6 +219,8 @@ async with client.avatar("portrait.jpg") as avatar:
 ```
 
 For callbacks, await `avatar.send_audio(chunk, sample_rate=24000)`, then `await avatar.end_turn()` when speech ends. Call `await avatar.interrupt()` on barge-in. Float32 uses `encoding="pcm_f32le"`; encoded streams use `encoding="mp3"`. [File example](examples/python/universal.py).
+
+</details>
 
 More connectors: [OpenAI Agents](examples/python/openai_agents.py), [Pipecat](examples/python/pipecat_bot.py), [Google ADK](examples/python/google_adk.py), [Vocode](examples/vocode/main.py), and [TEN](examples/ten/graph.json). Python examples have [locked dependencies](examples/python/requirements.lock); Vocode uses its [own environment](examples/vocode/requirements.lock).
 
@@ -213,7 +238,8 @@ client = Openspline(config=config)  # a dict works too
 
 | Python / Node option | Default | Purpose |
 | --- | --- | --- |
-| `url` | `OPENSPLINE_URL` or `http://localhost:7860` | Service address |
+| `api_key` / `apiKey` | `OPENSPLINE_API_KEY` | Backend-only Cloud key; automatically selects Cloud |
+| `url` | Cloud with a key; otherwise `http://localhost:7860` | Explicit URL or `OPENSPLINE_URL` overrides the service address |
 | `quality` | `low` | Default quality: `low` or `high` |
 | `timeout` | 180 s / 180,000 ms | HTTP and audio request timeout |
 | `viewer_timeout` / `viewerTimeout` | 60 s / 60,000 ms | Wait for the playback destination |
@@ -230,36 +256,21 @@ npm install @openspline/node
 
 ```ts
 import { Openspline, type OpensplineConfig } from "@openspline/node";
-const config: OpensplineConfig = { quality: "low", timeout: 180000 };
+const config: OpensplineConfig = { apiKey: "YOUR_API_KEY", quality: "low" };
 const client = new Openspline(config);
 await using avatar = await client.avatar("portrait.jpg");
 console.log(avatar.viewerUrl);
 await avatar.stream(agent.audioStream(), { sample_rate: 24000 });
 ```
 
+[Add a custom photo or video background](docs/custom_background.md).
+
+For a saved Cloud avatar, use `client.avatar({ avatarId: "YOUR_AVATAR_ID" })`. You can omit `apiKey` to read `OPENSPLINE_API_KEY` from your server environment. For a local service, omit the key and unset that environment variable.
+
 [Node examples](examples/node): run `npm ci` there, then `node universal.mjs portrait.jpg speech.wav`. Without `await using`, call `avatar.close()` in `finally`.
 
-## Frontend
-
-Pass `avatar.session` from your backend to your frontend. Keep the publisher token on the backend.
-
-```tsx
-import { Avatar } from "@openspline/react";
-
-<Avatar session={session} />
-```
-
-For vanilla JS, Vue, or Svelte, call `registerAvatarElement()` from `@openspline/browser/element`, then set `document.querySelector("openspline-avatar").session = session`. Both players handle connection, autoplay permission, and cleanup. React also exports `useAvatar()`.
-
-Install the component you need with `npm install @openspline/react` or `npm install @openspline/browser`.
-
-The built-in demo uses WebSocket playback through the server's HTTP port, including SSH port forwarding. For the same transport in your frontend, pass `{...session, transport: "websocket"}`; components otherwise use WebRTC.
 
 ## GPU workers
-
-### Choose GPUs in the demo
-
-Choose GPUs directly in the demo: one for Low, or one or more for High. The picker shows GPU names and memory; your selection is applied when you start and saved for restarts by the curl install. You can also set `OPENSPLINE_GPUS=0,1` when installing. Explicit `CUDA_VISIBLE_DEVICES` limits are respected. `/readyz` reports the active devices and inference ranks.
 
 ### Configure multiple workers
 
@@ -296,30 +307,9 @@ Real low/high inference, GPU streaming, browser/React playback, and native LiveK
 
 Openspline builds on open research and infrastructure, with thanks to the teams and contributors behind:
 
-- [SoulX-FlashHead](https://github.com/Soul-AILab/SoulX-FlashHead) for the audio-driven talking-head models and inference code that power avatar generation.
+- [SoulX-FlashHead](https://github.com/Soul-AILab/SoulX-FlashHead) for the audio-driven talking-head models that power avatar generation.
 - [LiveKit Agents](https://github.com/livekit/agents) for the real-time agent framework that Openspline integrates with to bring avatars into voice conversations.
 - [Wan](https://github.com/Wan-Video/Wan2.1) for video generation research and VAE components used in the inference backend through SoulX-FlashHead.
 - [LTX-Video](https://github.com/Lightricks/LTX-Video) for video autoencoder components used in the inference backend through SoulX-FlashHead.
 
 Openspline carries this work forward with a self-hosted runtime for interactive avatars: synchronized audio and video streaming, continuous idle motion, interruption handling, GPU worker orchestration, and a shared API across voice providers. Its Python and Node SDKs, agent connectors, and embeddable players make these capabilities available to developers building their own conversational experiences.
-
-
-### Custom photo and video backgrounds
-
-Pass an optional `background` file path or bytes when creating the avatar. Images stay still; videos loop silently during speech and idle playback. Upload a **PNG portrait with its background removed**: compositing uses the original portrait's alpha matte (a fixed silhouette, not automatic per-frame segmentation). Opaque portraits retain their original background. The background fills the portrait's aspect ratio with a centered cover crop.
-
-```python
-async with Openspline().avatar("portrait.png", background="scene.mp4") as avatar:
-    # Use any existing audio connector with this avatar.
-    await avatar.play_file("speech.wav")
-```
-
-```javascript
-const avatar = await new Openspline().avatar("portrait.png", {
-  background: "scene.jpg", // MP4/WebM or image; path or Uint8Array
-});
-```
-
-LiveKit's Python `AvatarSession` and Node `LiveKitAvatarSession`, Pipecat's `AvatarProcessor`, and TEN's extension properties also accept `background`. OpenAI Realtime/Agents, Gemini Live, Google ADK, ElevenLabs, Vocode, and universal audio adapters use the background configured on their shared avatar session. Browser, React, web component, WebRTC, and native LiveKit viewers receive the already-composited video without extra configuration.
-
-The HTTP API accepts an optional `background` file alongside `portrait` and `quality` in `POST /v1/sessions`. Limits: 25 MiB per background, 16 megapixels, and video up to 60 seconds / 120 fps. Video decoding retains only the current and next frame. Background selection lasts for the session; omit the field to keep the existing behavior.
