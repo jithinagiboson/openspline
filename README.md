@@ -32,24 +32,24 @@
 <!-- GitHub strips iframe/script embeds. These looping GIFs show published avatars. -->
 <table>
   <tr>
-    <th>Nikola Tesla</th>
     <th>Meera</th>
+    <th>Acharya</th>
     <th>Lisa</th>
   </tr>
   <tr>
-    <td align="center"><a href="https://dashboard.openspline.dev/nikola-tesla1"><img src="media/examples/nikola-tesla.gif" alt="Nikola Tesla talking avatar preview" width="240" height="240"></a><br><a href="https://dashboard.openspline.dev/nikola-tesla1">Try online</a></td>
     <td align="center"><a href="https://dashboard.openspline.dev/meera"><img src="media/examples/meera.gif" alt="Meera talking avatar preview" width="240" height="240"></a><br><a href="https://dashboard.openspline.dev/meera">Try online</a></td>
+    <td align="center"><a href="https://dashboard.openspline.dev/acharya-ji"><img src="media/examples/acharya.gif" alt="Acharya talking avatar preview" width="240" height="240"></a><br><a href="https://dashboard.openspline.dev/acharya-ji">Try online</a></td>
     <td align="center"><a href="https://dashboard.openspline.dev/hemant-virtual-testing2"><img src="media/examples/lisa.gif" alt="Lisa talking avatar preview" width="240" height="240"></a><br><a href="https://dashboard.openspline.dev/hemant-virtual-testing2">Try online</a></td>
   </tr>
   <tr>
-    <th>Acharya</th>
-    <th>Elon Musk</th>
-    <th>Ye</th>
+    <th>Steve</th>
+    <th>Emily</th>
+    <th>Professor Nikolaev</th>
   </tr>
   <tr>
-    <td align="center"><a href="https://dashboard.openspline.dev/acharya-ji"><img src="media/examples/acharya.gif" alt="Acharya talking avatar preview" width="240" height="240"></a><br><a href="https://dashboard.openspline.dev/acharya-ji">Try online</a></td>
-    <td align="center"><a href="https://dashboard.openspline.dev/elon"><img src="media/examples/elon-musk.gif" alt="Elon Musk talking avatar preview" width="240" height="240"></a><br><a href="https://dashboard.openspline.dev/elon">Try online</a></td>
-    <td align="center"><a href="https://dashboard.openspline.dev/ye-west"><img src="media/examples/ye.gif" alt="Ye talking avatar preview" width="240" height="240"></a><br><a href="https://dashboard.openspline.dev/ye-west">Try online</a></td>
+    <td align="center"><a href="https://dashboard.openspline.dev/steve"><img src="media/examples/steve.gif" alt="Steve talking avatar preview" width="240" height="240"></a><br><a href="https://dashboard.openspline.dev/steve">Try online</a></td>
+    <td align="center"><a href="https://dashboard.openspline.dev/emily"><img src="media/examples/emily.gif" alt="Emily talking avatar preview" width="240" height="240"></a><br><a href="https://dashboard.openspline.dev/emily">Try online</a></td>
+    <td align="center"><a href="https://dashboard.openspline.dev/professor-nikolaev"><img src="media/examples/professor.gif" alt="Professor Nikolaev talking avatar preview" width="240" height="240"></a><br><a href="https://dashboard.openspline.dev/professor-nikolaev">Try online</a></td>
   </tr>
 </table>
 
