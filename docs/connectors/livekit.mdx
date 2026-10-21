@@ -1,0 +1,27 @@
+---
+title: LiveKit Agents
+description: Add an avatar to a LiveKit AgentSession.
+---
+
+```bash
+pip install 'livekit-agents[openai]==1.8.3' openspline
+```
+
+Start the avatar before your agent session. Your normal LiveKit frontend receives the avatar.
+
+```python
+from openspline import Openspline
+from openspline.integrations.livekit import AvatarSession
+
+avatar = AvatarSession("portrait.jpg", client=Openspline(quality="low"))
+await avatar.start(agent_session, room=ctx.room)
+await agent_session.start(room=ctx.room, agent=agent)
+```
+
+```bash
+PORTRAIT=portrait.jpg python examples/python/livekit_agent.py dev
+```
+
+Set `OPENAI_API_KEY`, `LIVEKIT_URL`, `LIVEKIT_API_KEY`, and `LIVEKIT_API_SECRET` for the runnable example.
+
+[Python example](https://github.com/openspline/openspline/blob/main/examples/python/livekit_agent.py) · [Node example](https://github.com/openspline/openspline/blob/main/examples/node/livekit_agent.mjs)

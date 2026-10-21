@@ -1,0 +1,39 @@
+---
+title: Show the avatar
+description: Display a session in React or a browser custom element.
+---
+
+Send `avatar.session` from your backend to the browser. Keep your Cloud API key and publisher token on the backend.
+
+## React
+
+```bash
+npm install @openspline/react
+```
+
+```tsx
+import { Avatar } from "@openspline/react";
+
+<Avatar session={session} />
+```
+
+The package also exports `useAvatar()`.
+
+## Browser custom element
+
+```bash
+npm install @openspline/browser
+```
+
+```js
+import { registerAvatarElement } from "@openspline/browser/element";
+
+registerAvatarElement();
+document.querySelector("openspline-avatar").session = session;
+```
+
+```html
+<openspline-avatar></openspline-avatar>
+```
+
+Both players handle connection and autoplay permission. For the server's WebSocket transport, pass `{ ...session, transport: "websocket" }`; otherwise they use WebRTC. The built in `avatar.viewer_url` is the fastest way to watch a session.

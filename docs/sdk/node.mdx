@@ -1,0 +1,41 @@
+---
+title: Node SDK
+description: Stream audio or play a file from a Node voice agent.
+---
+
+Use Node 20+.
+
+```bash
+npm install @openspline/node
+```
+
+For Cloud, set `OPENSPLINE_API_KEY`. For a local service, leave it unset or set `OPENSPLINE_URL`.
+
+```ts
+import { Openspline } from "@openspline/node";
+
+const client = new Openspline();
+const avatar = await client.avatar("portrait.jpg");
+try {
+  console.log(avatar.viewerUrl);
+  await avatar.stream(agent.audioStream(), { sample_rate: 24000 });
+} finally {
+  await avatar.close();
+}
+```
+
+Play a WAV or MP3 file:
+
+```js
+const avatar = await new Openspline().avatar("portrait.jpg");
+try {
+  console.log(avatar.viewerUrl);
+  await avatar.playFile("speech.wav");
+} finally {
+  await avatar.close();
+}
+```
+
+For a saved Cloud avatar, call `client.avatar({ avatarId: "YOUR_AVATAR_ID" })`. The Node equivalents of `send_audio`, `end_turn`, and `interrupt` are `sendAudio`, `endTurn`, and `interrupt`.
+
+[Runnable Node example](https://github.com/openspline/openspline/blob/main/examples/node/universal.mjs) · [Configuration](/reference/configuration) · [Backgrounds](/guides/backgrounds)

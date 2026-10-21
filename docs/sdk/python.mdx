@@ -1,0 +1,38 @@
+---
+title: Python SDK
+description: Stream, play files, interrupt, and manage avatar sessions in Python.
+---
+
+```bash
+pip install openspline
+```
+
+For Cloud, set `OPENSPLINE_API_KEY`. For a local service, leave it unset or set `OPENSPLINE_URL`.
+
+```python
+from openspline import Openspline
+
+async with Openspline().avatar("portrait.jpg", quality="low") as avatar:
+    print(avatar.viewer_url)
+    await avatar.stream(agent.audio_stream(), sample_rate=24000)
+```
+
+Play a WAV or MP3 file:
+
+```python
+async with Openspline().avatar("portrait.jpg") as avatar:
+    print(avatar.viewer_url)
+    await avatar.play_file("speech.wav")
+```
+
+For callback based audio:
+
+```python
+await avatar.send_audio(chunk, sample_rate=24000)
+await avatar.end_turn()
+await avatar.interrupt()  # when the user interrupts
+```
+
+`send_audio()` defaults to mono PCM16. Use `encoding="pcm_f32le"` for Float32 or `encoding="mp3"` for MP3 chunks. `stream()` ends the turn and waits for playback. Call `await avatar.wait_for_viewer()` if your agent should wait until someone opens the player.
+
+[Runnable Python example](https://github.com/openspline/openspline/blob/main/examples/python/universal.py) · [Configuration](/reference/configuration) · [Backgrounds](/guides/backgrounds)

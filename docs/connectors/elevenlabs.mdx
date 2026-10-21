@@ -1,0 +1,31 @@
+---
+title: ElevenLabs Agents
+description: Send an ElevenLabs agent's audio events to an avatar.
+---
+
+Pass each decoded WebSocket event, including the initial metadata, to the adapter. Keep your input, pong, and tool handlers.
+
+```python
+import json
+from openspline import Openspline
+from openspline.integrations import ElevenLabsAgents
+
+async with Openspline().avatar("portrait.jpg") as avatar:
+    print(avatar.viewer_url)
+    await avatar.wait_for_viewer()
+    adapter = ElevenLabsAgents(avatar)
+    async for message in connection:
+        event = json.loads(message)
+        await adapter.handle(event)
+        await handle_event(event)
+```
+
+Set `ELEVENLABS_AGENT_ID`. Private agents also need `ELEVENLABS_API_KEY`; the runnable examples request a signed URL on the backend.
+
+```bash
+ELEVENLABS_AGENT_ID=... python examples/python/elevenlabs_agents.py portrait.jpg
+```
+
+The adapter supports PCM and μ-law, final audio flushes, and interruptions. If attaching after connection setup, pass the negotiated `audio_format`, such as `"pcm_24000"`. The demo plays one response; microphone conversations require your input handler.
+
+[Python example](https://github.com/openspline/openspline/blob/main/examples/python/elevenlabs_agents.py) · [Node example](https://github.com/openspline/openspline/blob/main/examples/node/elevenlabs_agents.mjs)

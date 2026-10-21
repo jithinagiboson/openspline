@@ -1,0 +1,24 @@
+---
+title: Other integrations
+description: Runnable Pipecat, Google ADK, Vocode, TEN, and custom audio examples.
+---
+
+Use the [Python SDK](/sdk/python) or [Node SDK](/sdk/node) for any async PCM16 audio stream.
+
+```python
+async with Openspline().avatar("portrait.jpg") as avatar:
+    print(avatar.viewer_url)
+    await avatar.stream(agent.audio_stream(), sample_rate=24000)
+```
+
+For callbacks, call `send_audio()` for each chunk, then `end_turn()` when speech ends and `interrupt()` on barge in.
+
+| Integration | Runnable example |
+| --- | --- |
+| Pipecat | [Python bot](https://github.com/openspline/openspline/blob/main/examples/python/pipecat_bot.py) |
+| Google ADK | [Python agent](https://github.com/openspline/openspline/blob/main/examples/python/google_adk.py) |
+| Vocode | [Vocode app](https://github.com/openspline/openspline/blob/main/examples/vocode/main.py) |
+| TEN | [TEN graph](https://github.com/openspline/openspline/blob/main/examples/ten/graph.json) |
+| Any audio source | [Python universal](https://github.com/openspline/openspline/blob/main/examples/python/universal.py) · [Node universal](https://github.com/openspline/openspline/blob/main/examples/node/universal.mjs) |
+
+The Python examples have [locked dependencies](https://github.com/openspline/openspline/blob/main/examples/python/requirements.lock). Vocode uses [its own lockfile](https://github.com/openspline/openspline/blob/main/examples/vocode/requirements.lock).

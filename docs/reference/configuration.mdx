@@ -1,0 +1,30 @@
+---
+title: Configuration
+description: Configure Cloud keys, service URLs, quality, and timeouts.
+---
+
+```python
+from openspline import Openspline, OpensplineConfig
+
+client = Openspline(url="http://localhost:7860", quality="low")
+client = Openspline(config=OpensplineConfig(quality="high", timeout=300))
+```
+
+```ts
+import { Openspline, type OpensplineConfig } from "@openspline/node";
+
+const config: OpensplineConfig = { apiKey: "YOUR_API_KEY", quality: "low" };
+const client = new Openspline(config);
+```
+
+| Python / Node option | Default | Use |
+| --- | --- | --- |
+| `api_key` / `apiKey` | `OPENSPLINE_API_KEY` | Cloud key, backend only |
+| `url` | Cloud with a key; otherwise `http://localhost:7860` | Service address; `OPENSPLINE_URL` also works |
+| `quality` | `low` | `low` or `high` |
+| `timeout` | 180 s / 180,000 ms | Requests and audio |
+| `viewer_timeout` / `viewerTimeout` | 60 s / 60,000 ms | Waiting for a viewer |
+
+Explicit settings override environment defaults. Per avatar `quality` overrides the client setting. Only the session descriptor belongs in the browser.
+
+[Full JSON Schema](https://github.com/openspline/openspline/blob/main/config.schema.json)

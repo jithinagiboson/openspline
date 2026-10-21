@@ -1,0 +1,18 @@
+---
+title: Create and embed in Cloud
+description: Create an avatar in the dashboard and embed it with one HTML element.
+---
+
+Create an avatar at [openspline.dev](https://openspline.dev): upload an image, select a voice, and set a prompt. Copy its path from the dashboard.
+
+```html
+<script src="https://dashboard.openspline.dev/embed.js" defer></script>
+<openspline-cloud
+  cloud-url="https://dashboard.openspline.dev"
+  path="nikola-tesla1">
+</openspline-cloud>
+```
+
+Replace `nikola-tesla1` with your avatar path. [Try a public avatar](https://dashboard.openspline.dev/nikola-tesla1) first.
+
+To supply your own agent audio, use the [Cloud API](/get-started/cloud-api).

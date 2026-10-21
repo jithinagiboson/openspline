@@ -1,0 +1,21 @@
+---
+title: Photo and video backgrounds
+description: Add a still image or looping video behind a transparent portrait.
+---
+
+Use a PNG portrait with its background removed. The portrait's alpha matte defines the silhouette; an opaque portrait keeps its original background. Images stay still and videos loop silently.
+
+```python
+async with Openspline().avatar("portrait.png", background="scene.mp4") as avatar:
+    await avatar.play_file("speech.wav")
+```
+
+```js
+const avatar = await new Openspline().avatar("portrait.png", {
+  background: "scene.jpg",
+});
+```
+
+Python accepts a file path or bytes; Node accepts a file path or `Uint8Array`. The HTTP API accepts a `background` file in `POST /v1/sessions`. Limits: 25 MiB, 16 megapixels, and video up to 60 seconds at 120 fps. Backgrounds are fixed for each session.
+
+LiveKit, Pipecat, and TEN accept `background` on their avatar session or processor. Other adapters use the background already set on their shared session. Viewers receive composited video automatically.

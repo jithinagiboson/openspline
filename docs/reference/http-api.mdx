@@ -1,0 +1,26 @@
+---
+title: Service HTTP API
+description: Session endpoints, health checks, and the local interactive API reference.
+---
+
+The SDKs handle session creation, streaming, interruption, and cleanup. For direct HTTP use, open the running service's [interactive API reference](http://localhost:7860/docs).
+
+| Endpoint | Use |
+| --- | --- |
+| `POST /v1/sessions` | Create a session with `portrait` or Cloud `avatar_id`, optional `background`, and `quality` |
+| `GET /v1/sessions/{id}` | Read session state |
+| `POST /v1/sessions/{id}/viewer` | Get a viewer descriptor |
+| `POST /v1/sessions/{id}/file` | Play an audio file |
+| `POST /v1/sessions/{id}/interrupt` | Stop current speech |
+| `DELETE /v1/sessions/{id}` | Close a session |
+| `GET /healthz`, `GET /readyz`, `GET /metrics` | Check health, readiness, and metrics |
+
+Create a local session:
+
+```bash
+curl -X POST http://localhost:7860/v1/sessions \
+  -F portrait=@portrait.jpg \
+  -F quality=low
+```
+
+Audio streaming uses `WS /v1/sessions/{id}/audio`; browser playback uses WebRTC or `WS /v1/sessions/{id}/playback`. Use an SDK unless you need to implement the wire protocol.

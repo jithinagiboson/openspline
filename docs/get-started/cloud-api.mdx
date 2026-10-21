@@ -1,0 +1,31 @@
+---
+title: Stream audio on Cloud
+description: Create an avatar session on OpenSpline GPUs with a Cloud API key.
+---
+
+Create a key in the [Cloud dashboard](https://dashboard.openspline.dev/developers). Keep it on your backend.
+
+```bash
+pip install openspline
+export OPENSPLINE_API_KEY="YOUR_API_KEY"
+```
+
+```python
+from openspline import Openspline
+
+async with Openspline().avatar("portrait.jpg") as avatar:
+    print(avatar.viewer_url)
+    await avatar.stream(agent.audio_stream(), sample_rate=24000)
+```
+
+Open the printed URL to watch playback. `agent.audio_stream()` is your async iterator of PCM16 chunks; `sample_rate` is in Hz.
+
+Use a portrait saved in the dashboard:
+
+```python
+async with Openspline().avatar(avatar_id="YOUR_AVATAR_ID") as avatar:
+    print(avatar.viewer_url)
+    await avatar.stream(agent.audio_stream(), sample_rate=24000)
+```
+
+Pass `avatar.session` to your [frontend](/guides/frontend). For Node, use the [Node SDK](/sdk/node).

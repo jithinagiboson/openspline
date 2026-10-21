@@ -1,0 +1,29 @@
+---
+title: GPU workers
+description: Configure concurrent local avatar sessions and network access.
+---
+
+Edit `~/.local/share/openspline/workers.yaml`. Each worker runs one active session; GPU assignments cannot overlap.
+
+```yaml
+workers:
+  - { id: low-0, quality: low, devices: [0] }
+  - { id: low-1, quality: low, devices: [1] }
+```
+
+For High quality, assign a GPU pair and prepare the models:
+
+```yaml
+workers:
+  - { id: high-0, quality: high, devices: [0, 1] }
+```
+
+```bash
+sh ~/.local/share/openspline/run.sh --prepare
+```
+
+Remove `OPENSPLINE_GPU`, `OPENSPLINE_GPUS`, and `OPENSPLINE_QUALITY` overrides when using multiple workers. Set `OPENSPLINE_HOST`, `OPENSPLINE_PORT`, and `OPENSPLINE_PUBLIC_URL` in the installed `.env` for remote access. Use HTTPS for remote microphone access; WebRTC also needs reachable UDP ports or TURN in `ice_servers`.
+
+Busy workers return `CapacityError`. An unconfigured quality returns `ConfigurationError`. Check `/readyz` and `/metrics` on the service.
+
+[Example workers.yaml](https://github.com/openspline/openspline/blob/main/workers.yaml)

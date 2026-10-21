@@ -1,0 +1,33 @@
+---
+title: OpenAI Realtime
+description: Forward OpenAI Realtime audio into an avatar while keeping your event handler.
+---
+
+```bash
+pip install 'openai==2.54.0' openspline
+```
+
+Wrap your existing Realtime connection:
+
+```python
+from openspline import Openspline
+from openspline.integrations import OpenAIRealtime
+
+async with Openspline().avatar("portrait.jpg") as avatar:
+    print(avatar.viewer_url)
+    await avatar.wait_for_viewer()
+    adapter = OpenAIRealtime(avatar, connection)
+    try:
+        async for event in adapter.wrap(connection):
+            await handle_event(event)
+    finally:
+        adapter.close()
+```
+
+The adapter forwards tools and transcripts to your existing handler.
+
+```bash
+OPENAI_API_KEY=... python examples/python/openai_realtime.py portrait.jpg
+```
+
+[Python example](https://github.com/openspline/openspline/blob/main/examples/python/openai_realtime.py) · [Node example](https://github.com/openspline/openspline/blob/main/examples/node/openai_realtime.mjs)

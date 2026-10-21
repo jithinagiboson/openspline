@@ -1,0 +1,28 @@
+---
+title: Gemini Live
+description: Forward audio and turn events from a Gemini Live session.
+---
+
+```bash
+pip install 'google-genai==1.75.0' openspline
+```
+
+```python
+from openspline import Openspline
+from openspline.integrations import GeminiLive
+
+async with Openspline().avatar("portrait.jpg") as avatar:
+    print(avatar.viewer_url)
+    await avatar.wait_for_viewer()
+    async for event in GeminiLive(avatar).wrap(live_session.receive()):
+        await handle_event(event)
+    await avatar.end_turn()
+```
+
+Repeat the receive loop for later turns. Set `GEMINI_API_KEY`; optionally set `GEMINI_LIVE_MODEL`.
+
+```bash
+GEMINI_API_KEY=... python examples/python/gemini.py portrait.jpg
+```
+
+[Python example](https://github.com/openspline/openspline/blob/main/examples/python/gemini.py) · [Node example](https://github.com/openspline/openspline/blob/main/examples/node/gemini.mjs)

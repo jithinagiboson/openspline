@@ -1,0 +1,24 @@
+---
+title: Develop and validate
+description: Run OpenSpline from source and check SDK changes.
+---
+
+From the repository root:
+
+```bash
+uv sync --all-packages
+npm ci
+npm run build
+uv run pytest
+npm test
+```
+
+Run a static portrait service without a GPU:
+
+```bash
+uv run openspline serve --backend test --dev
+```
+
+For Python integration examples, use the [example lockfile](https://github.com/openspline/openspline/blob/main/examples/python/requirements.lock) in a separate environment. Installer dependency locks can be regenerated with `python scripts/lock-gpu.py`.
+
+The service uses one worker per active session. Local GPU, playback, and native LiveKit paths have been exercised; long duration, multi GPU, Cloud provider, and TEN runtime validation remain incomplete.

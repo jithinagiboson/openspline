@@ -1,0 +1,31 @@
+---
+title: OpenAI Agents
+description: Connect an OpenAI Agents Realtime session to an avatar.
+---
+
+```bash
+pip install 'openai-agents==0.20.0' openspline
+```
+
+```python
+from agents.realtime import RealtimeAgent, RealtimeRunner
+from openspline import Openspline
+from openspline.integrations import OpenAIAgents
+
+async with Openspline().avatar("portrait.jpg") as avatar:
+    print(avatar.viewer_url)
+    await avatar.wait_for_viewer()
+    adapter = OpenAIAgents(avatar)
+    runner = RealtimeRunner(RealtimeAgent(name="Guide", instructions="Keep responses brief."))
+    async with await runner.run(model_config={"playback_tracker": adapter.tracker}) as session:
+        await session.send_message("Introduce yourself in two sentences.")
+        try:
+            async for event in adapter.wrap(session):
+                if event.type == "audio_end":
+                    break
+        finally:
+            adapter.close()
+        await avatar.end_turn()
+```
+
+[Python example](https://github.com/openspline/openspline/blob/main/examples/python/openai_agents.py) · [Node example](https://github.com/openspline/openspline/blob/main/examples/node/openai_agents.mjs)

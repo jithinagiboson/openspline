@@ -1,0 +1,29 @@
+---
+title: Run on your GPU
+description: Install the GPU service and stream your first local avatar.
+---
+
+On Linux or WSL2 with an NVIDIA GPU:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/openspline/openspline/main/install.sh | sh
+sh ~/.local/share/openspline/run.sh
+```
+
+Open [http://localhost:7860](http://localhost:7860) for the demo. Then use the same service from your agent:
+
+```bash
+pip install openspline
+```
+
+```python
+from openspline import Openspline
+
+async with Openspline().avatar("portrait.jpg", quality="low") as avatar:
+    print(avatar.viewer_url)
+    await avatar.stream(agent.audio_stream(), sample_rate=24000)
+```
+
+Open the printed viewer URL. The default service URL is `http://localhost:7860`.
+
+PyTorch uses CUDA 12.8 for Blackwell and CUDA 12.6 for older NVIDIA GPUs. AMD and Apple GPUs are unsupported. See [GPU workers](/reference/gpu-workers) for multiple GPUs and High quality.

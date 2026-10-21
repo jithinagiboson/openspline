@@ -15,19 +15,19 @@
 
 **Add a live face to any voice AI agent in five lines.** Turn a portrait and generated audio into synchronized video and speech on OpenSpline Cloud or your own GPU.
 
+
 [Try Online (no GPU or installation needed)](https://dashboard.openspline.dev/explore)
 
+[Read Docs](docs/index.mdx)
 
 - **Bring your agent.** Keep your prompts, tools, microphone, and voice provider.
 - **Python first, Node supported.** Stream audio or use a ready-made connector.
 - **Ready to display.** Built-in viewer, React component, and web component.
 - **Cloud or self-hosted.** Start with an openspline cloud, or run the models on your GPUs.
 
-[Quickstart](#quickstart) · [Openspline Cloud](#openspline-cloud) · [Self Host](#self-host) · [Connectors](#connectors) · [Configuration](#configuration) · [Node SDK](#node-sdk) · [Frontend](#frontend) · [GPU workers](#gpu-workers)
+> **AI agents:** Download and attach [llms.md](docs/llms.md) for the complete documentation in one file.
 
 ## Examples
-
-
 
 <!-- GitHub strips iframe/script embeds. These looping GIFs show published avatars. -->
 <table>

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "OpenSpline",
+  "colors": {
+    "primary": "#4F7D36",
+    "light": "#6B9B4C",
+    "dark": "#A7D47D"
+  },
+  "navigation": {
+    "groups": [
+      {
+        "group": "Start here",
+        "pages": ["index", "get-started/cloud-dashboard", "get-started/cloud-api", "get-started/self-host"]
+      },
+      {
+        "group": "Build an avatar",
+        "pages": ["sdk/python", "sdk/node", "guides/frontend", "guides/backgrounds"]
+      },
+      {
+        "group": "Connect your agent",
+        "pages": ["connectors/overview", "connectors/openai-realtime", "connectors/openai-agents", "connectors/livekit", "connectors/gemini", "connectors/elevenlabs", "connectors/other"]
+      },
+      {
+        "group": "Reference",
+        "pages": ["reference/configuration", "reference/gpu-workers", "reference/http-api", "reference/development"]
+      }
+    ]
+  }
+}
