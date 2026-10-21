@@ -18,7 +18,7 @@
 
 [Try Online (no GPU or installation needed)](https://dashboard.openspline.dev/explore)
 
-[Read Docs](docs/index.mdx)
+[Read Docs](https://docs.openspline.dev/)
 
 - **Bring your agent.** Keep your prompts, tools, microphone, and voice provider.
 - **Python first, Node supported.** Stream audio or use a ready-made connector.
