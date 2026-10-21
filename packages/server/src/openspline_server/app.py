@@ -82,7 +82,7 @@ def create_app(settings: Settings | None = None):
         await asyncio.gather(*(remove(id) for id in list(sessions)))
         await pool.close()
 
-    app = FastAPI(title="openspline", version="0.1.0", lifespan=lifespan)
+    app = FastAPI(title="openspline", version="0.1.1", lifespan=lifespan)
     app.state.pool = pool
     app.state.sessions = sessions
     app.add_middleware(

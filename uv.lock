@@ -1824,7 +1824,7 @@ wheels = [
 
 [[package]]
 name = "openspline"
-version = "0.1.0"
+version = "0.1.1"
 source = { editable = "packages/python" }
 dependencies = [
     { name = "httpx" },
@@ -1848,7 +1848,7 @@ provides-extras = ["media"]
 
 [[package]]
 name = "openspline-server"
-version = "0.1.0"
+version = "0.1.1"
 source = { editable = "packages/server" }
 dependencies = [
     { name = "aiortc" },
