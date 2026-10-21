@@ -24,6 +24,10 @@
       {
         "group": "Reference",
         "pages": ["reference/configuration", "reference/gpu-workers", "reference/http-api", "reference/development"]
+      },
+      {
+        "group": "More",
+        "pages": ["pricing"]
       }
     ]
   }
