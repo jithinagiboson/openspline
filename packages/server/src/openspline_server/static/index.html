@@ -40,6 +40,13 @@
             </select>
           </label>
         </div>
+        <label>Attention
+          <select id="attention" aria-describedby="attention-hint" disabled>
+            <option value="flash">FlashAttention</option>
+            <option value="pytorch">PyTorch built-in</option>
+          </select>
+          <span id="attention-hint" class="hint">Checking attention kernels…</span>
+        </label>
         <label id="agent-id-field" hidden>ElevenLabs agent ID
           <input id="agent-id" type="text" maxlength="256" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="agent-id-hint" disabled>
           <span id="agent-id-hint" class="hint"></span>
@@ -79,6 +86,6 @@
       <p id="copy-status" class="hint" role="status" aria-live="polite"></p>
     </section>
   </main>
-  <script type="module" src="/static/demo.js?v=4"></script>
+  <script type="module" src="/static/demo.js?v=5"></script>
 </body>
 </html>

@@ -34,7 +34,7 @@ from .config import Settings
 from .media import AudioTrack, VideoTrack
 from .session import Session
 from .socket_playback import SocketPlayback, jpeg
-from .worker import CapacityError, WorkerPool
+from .worker import CapacityError, WorkerPool, installed_attention_kernels
 
 STATIC = Path(__file__).parent / "static"
 
@@ -190,6 +190,25 @@ def create_app(settings: Settings | None = None):
             },
             headers={"Cache-Control": "no-store"},
         )
+
+    def attention_state():
+        return JSONResponse(
+            {"mode": pool.attention, "kernels": installed_attention_kernels()},
+            headers={"Cache-Control": "no-store"},
+        )
+
+    @app.get("/v1/demo/attention")
+    async def demo_attention():
+        return attention_state()
+
+    @app.post("/v1/demo/attention")
+    async def set_demo_attention(request: Request):
+        body = await request.json()
+        try:
+            await pool.set_attention(body.get("mode") if isinstance(body, dict) else None)
+        except ValueError as exc:
+            raise HTTPException(422, {"code": "configuration", "message": str(exc)}) from exc
+        return attention_state()
 
     @app.get("/v1/demo/quality/{id}")
     async def demo_quality_status(id: str):

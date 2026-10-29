@@ -27,10 +27,29 @@ class CapacityError(RuntimeError):
     pass
 
 
+ATTENTION_MODES = ("flash", "pytorch")
+# Optional kernels the vendored model checks on every attention call, fastest first.
+ATTENTION_KERNELS = {
+    "SAGE_ATTN_AVAILABLE": "sageattention",
+    "FLASH_ATTN_3_AVAILABLE": "flash_attn_interface",
+    "FLASH_ATTN_2_AVAILABLE": "flash_attn",
+}
+
+
+def installed_attention_kernels():
+    from importlib.util import find_spec
+
+    return [module for module in ATTENTION_KERNELS.values() if find_spec(module)]
+
+
 class TestEngine:
     def __init__(self):
         self.fps, self.chunk_samples, self.cache_samples = 25, 15360, 128000
         self.image = None
+        self.attention = "pytorch"
+
+    def set_attention(self, mode):
+        self.attention = mode
 
     def prepare(self, image, seed=0):
         from PIL import Image
@@ -56,6 +75,13 @@ class GPUEngine:
             from ._vendor.flash_head import inference as inf
 
         self.inf = inf
+        from ._vendor.flash_head.src.modules import flash_head_model
+
+        self.attention_module = flash_head_model
+        self.attention_kernels = {
+            name: getattr(flash_head_model, name) for name in ATTENTION_KERNELS
+        }
+        self.set_attention(settings.get("attention", "flash"))
         with WarmupSpan("pipeline_load", synchronize=torch.cuda.synchronize):
             self.pipeline = inf.get_pipeline(
                 world_size,
@@ -86,6 +112,11 @@ class GPUEngine:
         self.start = self.params["cached_audio_duration"] * self.fps - self.params["frame_num"]
         self.end = self.params["cached_audio_duration"] * self.fps
         self.first_inference = True
+
+    def set_attention(self, mode):
+        # "pytorch" hides the optional kernels so attention falls back to built-in SDPA.
+        for name, installed in self.attention_kernels.items():
+            setattr(self.attention_module, name, installed and mode == "flash")
 
     def prepare(self, image, seed=0):
         import random
@@ -155,6 +186,8 @@ def _rank_main(rank, world_size, settings, conn, port):
                 break
             if op == "prepare":
                 result = engine.prepare(*args)
+            elif op == "attention":
+                result = engine.set_attention(*args)
             elif op == "infer":
                 started = time.perf_counter()
                 frames = engine.infer(*args)
@@ -243,6 +276,7 @@ class Worker:
         self.owner = None
         self.info = {}
         self.error = None
+        self.attention = "flash"
         self.lock = asyncio.Lock()
 
     async def start(self):
@@ -270,6 +304,7 @@ class Worker:
             runtime_dir=self.settings.runtime_dir,
             quality=self.config.quality,
             devices=self.config.devices,
+            attention=self.attention,
         )
         self.process = mp.get_context("spawn").Process(
             target=_process_main, args=(payload, child), daemon=False
@@ -378,6 +413,26 @@ class WorkerPool:
 
     async def start(self):
         await asyncio.gather(*(w.start() for w in self.workers))
+
+    @property
+    def attention(self):
+        return self.workers[0].attention
+
+    async def set_attention(self, mode):
+        """Switch attention kernels in place; active sessions change at the next chunk."""
+        if mode not in ATTENTION_MODES:
+            raise ValueError("attention must be flash or pytorch")
+        if mode == "flash" and self.settings.backend == "gpu" and not installed_attention_kernels():
+            raise ValueError("No optimized attention kernel is installed; see the self-host docs")
+        for worker in self.workers:
+            # Workers that are down pick the mode up from their start payload.
+            worker.attention = mode
+        for worker in self.workers:
+            if worker.ready:
+                try:
+                    await worker.call("attention", mode)
+                except WorkerFailure:
+                    pass
 
     async def recover_idle(self):
         # Restart in the background so one slow model load cannot stall session expiry.
