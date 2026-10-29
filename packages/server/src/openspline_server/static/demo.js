@@ -2,10 +2,12 @@ import{registerAvatarElement}from'./browser/element.js';registerAvatarElement();
 import{waitForPlayback}from'./playback-ready.js';
 import{prepareDemoQuality}from'./demo-quality.js';
 import{setupGpuPicker}from'./demo-gpus.js';
+import{setupAttentionPicker}from'./demo-attention.js?v=2';
 import{setupDemoCredentials}from'./demo-credentials.js';
 import{setupDemoExamples}from'./demo-examples.js';
 import{createDemoRecording}from'./demo-recording.js';
 const $=id=>document.getElementById(id);let session,ws,media,context,worklet,previewURL,downloadURL,recording,playbackAbort,stopping,playbackError,providerNotice;
+setupAttentionPicker(request,$('attention'),$('attention-hint'));
 setupDemoExamples($('source'),$('example-title'),$('example-description'),$('example-code'),$('example-link'),$('copy-example'),$('copy-status'));
 const credentialsReady=setupDemoCredentials(request,$('source'),$('api-key-field'),$('api-key-label'),$('api-key'),$('api-key-hint'),{container:$('agent-id-field'),input:$('agent-id'),hint:$('agent-id-hint')});
 const gpuReady=fetch('/readyz').then(r=>r.json()).then(data=>{

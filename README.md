@@ -88,6 +88,19 @@ sh ~/.local/share/openspline/run.sh
 
 Open [http://localhost:7860](http://localhost:7860) to access the demo.
 
+### Optional: faster attention
+
+Optionally install SageAttention 2 and FlashAttention 2, as recommended by [SoulX-FlashHead](https://huggingface.co/Soul-AILab/SoulX-FlashHead-1_3B), for faster inference. The service detects them at startup, uses the fastest one installed (SageAttention, then FlashAttention), and otherwise uses PyTorch attention:
+
+```bash
+cd ~/.local/share/openspline
+py=$(.venv/bin/python -c 'import sys; print(f"cp{sys.version_info.major}{sys.version_info.minor}")')
+cuda=$(.venv/bin/python -c 'import torch; print(torch.version.cuda)')
+.tools/uv pip install --python .venv/bin/python --index "https://wheels.astral.sh/simple/cu$(echo "$cuda" | tr -d .)/" "sageattention==2.2.0+cu.$cuda.torch.2.7" "https://github.com/Dao-AILab/flash-attention/releases/download/v2.8.0.post2/flash_attn-2.8.0.post2+cu12torch2.7cxx11abiTRUE-$py-$py-linux_x86_64.whl"
+```
+
+Both are prebuilt wheels that match the environment's Python, CUDA and PyTorch 2.7, so nothing compiles: SageAttention 2 comes from [Astral's GPU index](https://github.com/astral-sh-build/build-sageattention) (it is not on PyPI), pinned to the PyTorch 2.7 build so the installed PyTorch is never replaced, and FlashAttention from its [GitHub release](https://github.com/Dao-AILab/flash-attention/releases/tag/v2.8.0.post2). SageAttention 2 supports Ampere and newer GPUs. The demo page can switch between the installed kernels and PyTorch attention without restarting.
+
 ### Python SDK
 
 Install the client package where your agent runs:
