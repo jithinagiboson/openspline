@@ -2,7 +2,7 @@ import{registerAvatarElement}from'./browser/element.js';registerAvatarElement();
 import{waitForPlayback}from'./playback-ready.js';
 import{prepareDemoQuality}from'./demo-quality.js';
 import{setupGpuPicker}from'./demo-gpus.js';
-import{setupAttentionPicker}from'./demo-attention.js';
+import{setupAttentionPicker}from'./demo-attention.js?v=2';
 import{setupDemoCredentials}from'./demo-credentials.js';
 import{setupDemoExamples}from'./demo-examples.js';
 import{createDemoRecording}from'./demo-recording.js';

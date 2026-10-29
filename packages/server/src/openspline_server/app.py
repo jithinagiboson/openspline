@@ -34,7 +34,7 @@ from .config import Settings
 from .media import AudioTrack, VideoTrack
 from .session import Session
 from .socket_playback import SocketPlayback, jpeg
-from .worker import CapacityError, WorkerPool, installed_attention_kernels
+from .worker import CapacityError, WorkerPool, attention_kernels_for
 
 STATIC = Path(__file__).parent / "static"
 
@@ -193,7 +193,10 @@ def create_app(settings: Settings | None = None):
 
     def attention_state():
         return JSONResponse(
-            {"mode": pool.attention, "kernels": installed_attention_kernels()},
+            {
+                "mode": pool.attention,
+                "kernels": {mode: attention_kernels_for(mode) for mode in ("sage", "flash")},
+            },
             headers={"Cache-Control": "no-store"},
         )
 

@@ -1,14 +1,18 @@
+const LABELS = {sage: 'SageAttention', flash: 'FlashAttention'};
+
 export async function setupAttentionPicker(request, select, hint) {
-  const flash = select.querySelector('option[value="flash"]');
   let state;
   function render() {
-    const installed = state.kernels.length > 0;
-    flash.disabled = !installed;
-    select.value = installed ? state.mode : 'pytorch';
-    select.disabled = !installed;
-    hint.textContent = installed
-      ? `${select.value === 'flash' ? `Using ${state.kernels[0]}` : 'Using PyTorch attention'}. Applies immediately, even mid-session.`
-      : 'FlashAttention is not installed; using PyTorch attention.';
+    const installed = Object.keys(LABELS).filter(mode => state.kernels[mode].length > 0);
+    for (const mode of Object.keys(LABELS)) {
+      select.querySelector(`option[value="${mode}"]`).disabled = !installed.includes(mode);
+    }
+    select.value = installed.includes(state.mode) ? state.mode : 'pytorch';
+    select.disabled = installed.length === 0;
+    const kernels = state.kernels[select.value];
+    hint.textContent = installed.length > 0
+      ? `${kernels ? `Using ${kernels[0]}` : 'Using PyTorch attention'}. Applies immediately, even mid-session.`
+      : 'SageAttention and FlashAttention are not installed; using PyTorch attention.';
   }
   select.addEventListener('change', async () => {
     const mode = select.value;

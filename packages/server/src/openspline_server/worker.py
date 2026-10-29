@@ -27,19 +27,31 @@ class CapacityError(RuntimeError):
     pass
 
 
-ATTENTION_MODES = ("flash", "pytorch")
-# Optional kernels the vendored model checks on every attention call, fastest first.
+ATTENTION_MODES = ("sage", "flash", "pytorch")
+# Optional kernels the vendored model checks on every attention call, fastest first,
+# with the mode that enables each.
 ATTENTION_KERNELS = {
-    "SAGE_ATTN_AVAILABLE": "sageattention",
-    "FLASH_ATTN_3_AVAILABLE": "flash_attn_interface",
-    "FLASH_ATTN_2_AVAILABLE": "flash_attn",
+    "SAGE_ATTN_AVAILABLE": ("sageattention", "sage"),
+    "FLASH_ATTN_3_AVAILABLE": ("flash_attn_interface", "flash"),
+    "FLASH_ATTN_2_AVAILABLE": ("flash_attn", "flash"),
 }
 
 
 def installed_attention_kernels():
     from importlib.util import find_spec
 
-    return [module for module in ATTENTION_KERNELS.values() if find_spec(module)]
+    return [module for module, _ in ATTENTION_KERNELS.values() if find_spec(module)]
+
+
+def attention_kernels_for(mode):
+    installed = installed_attention_kernels()
+    return [module for module, kernel_mode in ATTENTION_KERNELS.values()
+            if kernel_mode == mode and module in installed]
+
+
+def default_attention():
+    """The fastest installed mode, falling back to PyTorch SDPA."""
+    return next((mode for mode in ATTENTION_MODES[:-1] if attention_kernels_for(mode)), "pytorch")
 
 
 class TestEngine:
@@ -81,7 +93,7 @@ class GPUEngine:
         self.attention_kernels = {
             name: getattr(flash_head_model, name) for name in ATTENTION_KERNELS
         }
-        self.set_attention(settings.get("attention", "flash"))
+        self.set_attention(settings.get("attention") or default_attention())
         with WarmupSpan("pipeline_load", synchronize=torch.cuda.synchronize):
             self.pipeline = inf.get_pipeline(
                 world_size,
@@ -114,9 +126,10 @@ class GPUEngine:
         self.first_inference = True
 
     def set_attention(self, mode):
-        # "pytorch" hides the optional kernels so attention falls back to built-in SDPA.
+        # Expose only the chosen mode's kernels; "pytorch" hides them all so attention
+        # falls back to built-in SDPA.
         for name, installed in self.attention_kernels.items():
-            setattr(self.attention_module, name, installed and mode == "flash")
+            setattr(self.attention_module, name, installed and ATTENTION_KERNELS[name][1] == mode)
 
     def prepare(self, image, seed=0):
         import random
@@ -276,7 +289,7 @@ class Worker:
         self.owner = None
         self.info = {}
         self.error = None
-        self.attention = "flash"
+        self.attention = default_attention()
         self.lock = asyncio.Lock()
 
     async def start(self):
@@ -421,9 +434,10 @@ class WorkerPool:
     async def set_attention(self, mode):
         """Switch attention kernels in place; active sessions change at the next chunk."""
         if mode not in ATTENTION_MODES:
-            raise ValueError("attention must be flash or pytorch")
-        if mode == "flash" and self.settings.backend == "gpu" and not installed_attention_kernels():
-            raise ValueError("No optimized attention kernel is installed; see the self-host docs")
+            raise ValueError("attention must be sage, flash or pytorch")
+        if mode != "pytorch" and self.settings.backend == "gpu" and not attention_kernels_for(mode):
+            name = {"sage": "SageAttention", "flash": "FlashAttention"}[mode]
+            raise ValueError(f"{name} is not installed; see the self-host docs")
         for worker in self.workers:
             # Workers that are down pick the mode up from their start payload.
             worker.attention = mode

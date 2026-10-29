@@ -5,7 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 from openspline_server.app import create_app
 from openspline_server.config import Settings
-from openspline_server.worker import WorkerPool
+from openspline_server.worker import WorkerPool, default_attention
 from PIL import Image
 
 
@@ -21,7 +21,8 @@ def test_demo_switches_attention_in_place_and_mid_session(tmp_path):
         worker = app.state.pool.workers[0]
         pid = worker.process.pid
         state = client.get("/v1/demo/attention").json()
-        assert state["mode"] == "flash" and isinstance(state["kernels"], list)
+        assert state["mode"] == default_attention()
+        assert set(state["kernels"]) == {"sage", "flash"}
 
         response = client.post("/v1/demo/attention", json={"mode": "pytorch"})
         assert response.status_code == 200 and response.json()["mode"] == "pytorch"
@@ -33,9 +34,10 @@ def test_demo_switches_attention_in_place_and_mid_session(tmp_path):
         )
         assert response.status_code == 201, response.text
         session = response.json()
-        response = client.post("/v1/demo/attention", json={"mode": "flash"})
-        assert response.status_code == 200 and response.json()["mode"] == "flash"
-        assert worker.ready and worker.owner == session["id"] and worker.attention == "flash"
+        for mode in ("sage", "flash"):
+            response = client.post("/v1/demo/attention", json={"mode": mode})
+            assert response.status_code == 200 and response.json()["mode"] == mode
+            assert worker.ready and worker.owner == session["id"] and worker.attention == mode
 
         for mode in (None, "fast", 1):
             response = client.post("/v1/demo/attention", json={"mode": mode})
@@ -60,12 +62,46 @@ def test_restarted_worker_keeps_attention_mode(tmp_path):
     asyncio.run(run())
 
 
-def test_gpu_backend_rejects_flash_without_kernels(tmp_path, monkeypatch):
+def test_gpu_backend_rejects_kernels_that_are_not_installed(tmp_path, monkeypatch):
     from openspline_server import worker as worker_module
 
-    monkeypatch.setattr(worker_module, "installed_attention_kernels", lambda: [])
+    monkeypatch.setattr(worker_module, "installed_attention_kernels", lambda: ["flash_attn"])
     pool = WorkerPool(Settings(backend="gpu", runtime_dir=str(tmp_path)))
-    with pytest.raises(ValueError, match="No optimized attention kernel"):
-        asyncio.run(pool.set_attention("flash"))
+    assert pool.attention == "flash"
+    with pytest.raises(ValueError, match="SageAttention is not installed"):
+        asyncio.run(pool.set_attention("sage"))
     asyncio.run(pool.set_attention("pytorch"))
     assert pool.attention == "pytorch"
+
+    monkeypatch.setattr(worker_module, "installed_attention_kernels", lambda: [])
+    with pytest.raises(ValueError, match="FlashAttention is not installed"):
+        asyncio.run(pool.set_attention("flash"))
+
+
+def test_default_attention_prefers_fastest_installed(monkeypatch):
+    from openspline_server import worker as worker_module
+
+    for installed, mode in (
+        (["sageattention", "flash_attn"], "sage"),
+        (["flash_attn_interface"], "flash"),
+        ([], "pytorch"),
+    ):
+        monkeypatch.setattr(worker_module, "installed_attention_kernels", lambda i=installed: i)
+        assert default_attention() == mode
+
+
+def test_gpu_engine_exposes_only_the_chosen_kernels():
+    from types import SimpleNamespace
+
+    from openspline_server.worker import ATTENTION_KERNELS, GPUEngine
+
+    engine = GPUEngine.__new__(GPUEngine)
+    engine.attention_module = SimpleNamespace()
+    engine.attention_kernels = dict.fromkeys(ATTENTION_KERNELS, True)
+    for mode, enabled in (
+        ("sage", {"SAGE_ATTN_AVAILABLE"}),
+        ("flash", {"FLASH_ATTN_3_AVAILABLE", "FLASH_ATTN_2_AVAILABLE"}),
+        ("pytorch", set()),
+    ):
+        engine.set_attention(mode)
+        assert {name for name in ATTENTION_KERNELS if getattr(engine.attention_module, name)} == enabled
