@@ -88,6 +88,18 @@ sh ~/.local/share/openspline/run.sh
 
 Open [http://localhost:7860](http://localhost:7860) to access the demo.
 
+### Optional: faster attention
+
+Optionally install FlashAttention 2, as recommended by [SoulX-FlashHead](https://huggingface.co/Soul-AILab/SoulX-FlashHead-1_3B), for faster inference. The service detects it at startup and otherwise uses PyTorch attention:
+
+```bash
+cd ~/.local/share/openspline
+py=$(.venv/bin/python -c 'import sys; print(f"cp{sys.version_info.major}{sys.version_info.minor}")')
+.tools/uv pip install --python .venv/bin/python "https://github.com/Dao-AILab/flash-attention/releases/download/v2.8.0.post2/flash_attn-2.8.0.post2+cu12torch2.7cxx11abiTRUE-$py-$py-linux_x86_64.whl"
+```
+
+This [prebuilt wheel](https://github.com/Dao-AILab/flash-attention/releases/tag/v2.8.0.post2) matches the environment's Python and PyTorch 2.7; building flash-attn from PyPI instead compiles CUDA kernels for a long time. SageAttention 2 is used ahead of FlashAttention when present, but it is not on PyPI; build it from [source](https://github.com/thu-ml/SageAttention) if needed.
+
 ### Python SDK
 
 Install the client package where your agent runs:
